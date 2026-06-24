@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portafolio Digital · Norman Valenzuela · Expresión del Diseño Gráfico I</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E1C54; --navy-2:#172A6E; --navy-deep:#0A1640;
+  --gold:#2C46C0; --gold-soft:#9aa4cf; --gold-deep:#2B45B0;
+  --green:#2C46C0; --green-deep:#1f3494;
+  --cream:#F3F4F6; --paper:#FBFBFD; --card:#FFFFFF;
+  --ink:#13205C; --slate:#5B6488; --slate-soft:#9098b6;
+  --line:rgba(14,28,84,.12); --line-2:rgba(14,28,84,.2);
+  --sh:0 18px 50px -28px rgba(9,21,64,.45);
+  --sh-sm:0 8px 22px -16px rgba(9,21,64,.35);
+  --ease:cubic-bezier(.42,0,.12,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',sans-serif;color:var(--ink);overflow:hidden;
+  background:#070d2e;
+  background-image:radial-gradient(120% 90% at 50% 16%,#0e1c54 0%,#070d2e 60%,#05081f 100%);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+.mono{font-family:'Inter',monospace}
+.disp{font-family:'Schibsted Grotesk',sans-serif}
+.serif{font-family:'Inter',serif}
+
+/* ===================== HUD (fuera del escenario) ===================== */
+.hud{position:fixed;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 26px;color:#fff;pointer-events:none}
+.hud.top{top:0;height:64px}
+.hud.bot{bottom:0;height:72px}
+.brand{display:flex;align-items:center;gap:11px;pointer-events:auto}
+.brand .mk{font-family:'Schibsted Grotesk';font-weight:700;font-size:15px;letter-spacing:.5px;background:#fff;color:var(--navy);padding:4px 8px;border-radius:5px;line-height:1}
+.brand .mk b{color:var(--green)}
+.brand .lbl{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;font-family:'Inter'}
+.hud .hint{pointer-events:auto;font-family:'Inter';font-size:11px;color:rgba(255,255,255,.42);letter-spacing:.04em;display:flex;gap:14px}
+.hud .hint kbd{border:1px solid rgba(255,255,255,.22);border-radius:4px;padding:1px 6px;font-family:inherit}
+.counter{pointer-events:auto;font-family:'Inter';font-size:13px;color:rgba(255,255,255,.7);letter-spacing:.05em}
+.counter b{color:var(--gold-soft);font-weight:700}
+
+.dots{display:flex;gap:7px;align-items:center;pointer-events:auto}
+.dot{width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,.24);cursor:pointer;transition:.3s var(--ease);padding:0}
+.dot:hover{background:rgba(255,255,255,.6);transform:scale(1.3)}
+.dot.active{background:var(--gold);width:24px;border-radius:5px}
+.dot:focus-visible{outline:2px solid var(--gold-soft);outline-offset:3px}
+.nav-btns{display:flex;gap:9px;pointer-events:auto}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.04);color:#fff;cursor:pointer;font-size:18px;display:grid;place-items:center;transition:.25s var(--ease)}
+.nav-btn:hover:not(:disabled){background:#fff;color:var(--navy);transform:translateY(-2px)}
+.nav-btn:disabled{opacity:.28;cursor:default}
+.nav-btn:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
+
+/* ===================== ESCENARIO 16:9 fijo ===================== */
+.stage-wrap{position:fixed;inset:0}
+.stage{position:fixed;width:1280px;height:720px;left:50%;top:50%;transform:translate(-50%,-50%);transform-origin:center center;border-radius:10px;overflow:hidden;box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04);background:var(--cream)}
+.slide{position:absolute;inset:0;width:1280px;height:720px;opacity:0;visibility:hidden;transform:scale(1.012);transition:opacity .5s var(--ease),transform .5s var(--ease),visibility .5s;background:var(--cream)}
+.slide.active{opacity:1;visibility:visible;transform:none;z-index:2}
+.grain:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
+
+/* reveal */
+[data-reveal]{opacity:0;transform:translateY(16px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.slide.active [data-reveal]{opacity:1;transform:none;transition-delay:calc(var(--d,0)*80ms + 140ms)}
+
+.canvas{position:absolute;inset:0;padding:46px 56px 40px;display:flex;flex-direction:column}
+.eyebrow{font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);font-family:'Inter'}
+
+/* running header / footer (cromo editorial, como sus documentos) */
+.runhdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:auto}
+.runhdr .l{display:flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--slate-soft);font-family:'Inter'}
+.runhdr .l .um{font-family:'Schibsted Grotesk';font-weight:700;font-size:12px;letter-spacing:.4px;color:var(--navy)}
+.runhdr .l .um b{color:var(--green)}
+.runfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-soft);font-family:'Inter'}
+.folio{font-family:'Schibsted Grotesk';font-weight:600;font-size:13px;color:var(--gold-deep);letter-spacing:.5px}
+
+/* ===================== COVER ===================== */
+#s-cover{background:var(--navy)}
+#s-cover .cv{position:absolute;inset:0;display:grid;grid-template-columns:1.04fr .96fr}
+.cv-l{padding:60px 54px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;z-index:2}
+.cv-um{display:flex;align-items:center;gap:13px}
+.cv-um .mk{font-family:'Schibsted Grotesk';font-weight:700;font-size:24px;letter-spacing:.5px;background:#fff;color:var(--navy);padding:7px 12px;border-radius:8px;line-height:1}
+.cv-um .mk b{color:var(--green)}
+.cv-um .sub{font-size:10px;letter-spacing:.13em;color:rgba(255,255,255,.6);text-transform:uppercase;line-height:1.55;font-weight:500}
+.cv-ce{color:var(--gold-soft);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;margin-bottom:18px;font-family:'Inter'}
+.cv-title{font-family:'Schibsted Grotesk';font-weight:600;line-height:.9;letter-spacing:.5px;text-transform:uppercase}
+.cv-title span{display:block;font-size:66px}
+.cv-title .a{color:#fff}.cv-title .b{color:var(--gold)}.cv-title .c{color:#fff}
+.cv-rule{width:60px;height:3px;background:var(--gold);margin:22px 0 17px}
+.cv-lede{max-width:360px;color:rgba(255,255,255,.76);font-size:14.5px;line-height:1.62}
+.cv-lede .serif{font-style:italic;color:var(--gold-soft)}
+.cv-meta{display:grid;grid-template-columns:repeat(4,auto);gap:0 34px}
+.cv-meta .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-soft);font-family:'Inter';margin-bottom:6px}
+.cv-meta .v{font-size:13px;color:#fff;font-weight:500;line-height:1.3}
+.cv-r{position:relative;border-left:1px solid rgba(255,255,255,.08);overflow:hidden}
+.sig-grid line{stroke:rgba(255,255,255,.085);stroke-width:1}
+.sig-ring{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-dasharray:560;stroke-dashoffset:560}
+.slide.active .sig-ring{animation:draw 1.5s var(--ease) .45s forwards}
+.sig-tri{fill:#E6DFD0;opacity:0}.slide.active .sig-tri{animation:pop .65s var(--ease) 1s forwards}
+.sig-sq{fill:var(--green);opacity:0}.slide.active .sig-sq{animation:pop .65s var(--ease) 1.25s forwards}
+.sig-dot{fill:var(--gold);opacity:0;transform-origin:center}.slide.active .sig-dot{animation:pop .55s var(--ease) 1.4s forwards,pulse 3.6s ease-in-out 2.3s infinite}
+.sig-plus{stroke:var(--gold);stroke-width:2;opacity:0}.slide.active .sig-plus{animation:fade .6s ease 1.7s forwards}
+.sig-tag{fill:var(--gold-soft);font-family:'Inter';font-size:9px;letter-spacing:.1em;opacity:0}.slide.active .sig-tag{animation:fade .6s ease 1.85s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fade{to{opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
+
+/* ===================== ÍNDICE ===================== */
+.sec-h h2{font-family:'Schibsted Grotesk';font-weight:600;font-size:43px;text-transform:uppercase;letter-spacing:.5px;line-height:.96;color:var(--navy);margin-top:9px}
+.sec-h h2 .mark{position:relative;display:inline-block}
+.sec-h h2 .mark:after{content:"";position:absolute;left:-2px;right:-2px;bottom:5px;height:11px;background:rgba(201,154,79,.32);z-index:-1;transform:rotate(-.6deg)}
+.sec-h .sub{color:var(--slate);font-size:14.5px;margin-top:11px;max-width:540px;line-height:1.55}
+.idx-wrap{margin-top:32px;position:relative}
+.idx-line{position:absolute;top:38px;left:30px;right:30px;height:1px;background:var(--line-2);z-index:0}
+.idx-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;position:relative;z-index:1}
+.idx-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 16px 16px;cursor:pointer;text-align:left;transition:.32s var(--ease);position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:208px}
+.idx-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .35s var(--ease)}
+.idx-card:hover{transform:translateY(-7px);box-shadow:var(--sh);border-color:transparent}
+.idx-card:hover:before{transform:scaleY(1)}
+.idx-card:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.idx-num{width:42px;height:42px;border-radius:50%;border:2px solid var(--accent);color:var(--accent);font-family:'Schibsted Grotesk';font-weight:700;font-size:19px;display:grid;place-items:center;background:var(--paper)}
+.idx-unit{font-family:'Inter';font-size:10px;letter-spacing:.1em;color:var(--slate-soft);text-transform:uppercase;margin:15px 0 7px}
+.idx-theme{font-weight:600;font-size:13.5px;color:var(--navy);line-height:1.28;margin-bottom:auto}
+.idx-act{font-size:11.5px;color:var(--slate);margin-top:11px;line-height:1.4;font-style:italic;font-family:'Inter'}
+.idx-go{margin-top:11px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;font-family:'Inter'}
+
+/* ===================== PRESENTACIÓN ===================== */
+.pres{flex:1;display:grid;grid-template-columns:.78fr 1.22fr;gap:42px;align-items:center}
+.pp{aspect-ratio:4/5;max-height:430px;background:linear-gradient(150deg,var(--navy-2),var(--navy-deep));border-radius:16px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:24px;box-shadow:var(--sh)}
+.pp .tagmk{position:absolute;top:20px;left:22px;font-family:'Inter';font-size:10.5px;color:var(--gold-soft);letter-spacing:.08em}
+.pp .ini{font-family:'Schibsted Grotesk';font-weight:700;font-size:150px;color:rgba(255,255,255,.06);position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);line-height:1;letter-spacing:2px}
+.pp .ring{position:absolute;width:130px;height:130px;border:2px solid rgba(201,154,79,.4);border-radius:50%;top:30px;right:-32px}
+.pp .nm{position:relative;z-index:2;color:#fff}
+.pp .nm .n{font-family:'Schibsted Grotesk';font-weight:600;font-size:25px;text-transform:uppercase;letter-spacing:.5px;line-height:1.04}
+.pp .nm .r{color:var(--gold-soft);font-size:11.5px;margin-top:7px;letter-spacing:.03em}
+.pres-b h2{font-family:'Schibsted Grotesk';font-weight:600;font-size:38px;text-transform:uppercase;color:var(--navy);line-height:1;margin:9px 0 15px;letter-spacing:.5px}
+.pres-b p{color:var(--slate);font-size:14px;line-height:1.7;text-align:justify;margin-bottom:12px}
+.pres-b p b{color:var(--navy);font-weight:600}
+.pres-b a{color:var(--gold-deep);font-weight:600;text-decoration:none;border-bottom:1.5px solid rgba(201,154,79,.45);transition:.2s var(--ease);white-space:nowrap}
+.pres-b a:hover{border-bottom-color:var(--gold-deep);color:var(--navy)}
+.ficha{display:flex;gap:26px;margin:16px 0 14px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ficha .it .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);font-family:'Inter';margin-bottom:4px}
+.ficha .it .v{font-size:12.5px;color:var(--navy);font-weight:500}
+.pres-tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{font-size:11px;font-family:'Inter';color:var(--navy);background:rgba(27,39,69,.05);border:1px solid var(--line);padding:5px 10px;border-radius:18px}
+
+/* ===================== UNIDADES ===================== */
+.unit{flex:1;display:grid;grid-template-columns:1.05fr .95fr;gap:38px;align-items:stretch;padding-top:18px}
+.unit.flip .u-info{order:2}.unit.flip .u-evid{order:1}
+.u-info{display:flex;flex-direction:column;min-width:0}
+.u-top{display:flex;align-items:flex-start;gap:15px;margin-bottom:6px}
+.u-bignum{font-family:'Schibsted Grotesk';font-weight:700;font-size:80px;color:var(--accent);line-height:.78}
+.u-tag{font-family:'Inter';font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--slate-soft)}
+.u-theme{font-size:12.5px;color:var(--slate);font-weight:500;margin-top:5px;font-style:italic;font-family:'Inter'}
+.u-act{font-family:'Schibsted Grotesk';font-weight:600;font-size:30px;text-transform:uppercase;color:var(--navy);line-height:1.02;letter-spacing:.4px;margin:12px 0 15px}
+.u-block{margin-bottom:13px}
+.u-block .h{font-family:'Inter';font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent-d);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.u-block .h:before{content:"";width:13px;height:2px;background:var(--accent)}
+.u-block p{color:var(--slate);font-size:13px;line-height:1.56;text-align:justify}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;color:var(--navy);background:var(--card);border:1px solid var(--line);padding:5px 10px;border-radius:7px;font-weight:500;transition:.25s var(--ease)}
+.chip:hover{border-color:var(--accent);transform:translateY(-2px)}
+.chip.click{cursor:pointer}
+.explore{margin-top:6px;margin-bottom:4px;align-self:flex-start;display:inline-flex;align-items:center;gap:10px;font-family:'Inter';font-size:11.5px;font-weight:500;letter-spacing:.04em;color:#fff;background:var(--accent);border:none;padding:11px 18px;border-radius:9px;cursor:pointer;transition:.28s var(--ease);box-shadow:var(--sh-sm)}
+.explore:hover{transform:translateY(-3px);filter:brightness(1.07)}
+.explore .pl{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:10px}
+.explore:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+
+.u-evid{display:flex;flex-direction:column}
+.u-evid .h{font-family:'Inter';font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent-d);font-weight:700;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.stamp{font-family:'Schibsted Grotesk';font-weight:600;font-size:10px;letter-spacing:.1em;color:var(--accent);border:1.5px solid var(--accent);border-radius:4px;padding:2px 7px;transform:rotate(2.5deg);opacity:.8}
+.gallery{display:grid;gap:9px}
+.gallery.g6,.gallery.g5,.gallery.g3{grid-template-columns:repeat(3,1fr)}
+.gallery.g1{grid-template-columns:1fr}
+.thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;position:relative;transition:.3s var(--ease);aspect-ratio:.78;box-shadow:var(--sh-sm)}
+.gallery.g1 .thumb{aspect-ratio:1.46}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:.4s var(--ease)}
+.thumb:hover{transform:translateY(-4px);box-shadow:var(--sh);border-color:var(--accent)}
+.thumb:hover img{transform:scale(1.05)}
+.thumb .zi{position:absolute;right:7px;bottom:7px;width:24px;height:24px;border-radius:50%;background:rgba(20,29,54,.8);color:#fff;display:grid;place-items:center;font-size:12px;opacity:0;transition:.25s var(--ease)}
+.thumb:hover .zi{opacity:1}
+.thumb .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(20,29,54,.84));color:#fff;font-size:8.5px;padding:14px 7px 5px;font-family:'Inter';letter-spacing:.02em;opacity:0;transition:.25s var(--ease)}
+.thumb:hover .cap{opacity:1}
+.g-note{font-size:10px;color:var(--slate-soft);margin-top:8px;font-family:'Inter';display:flex;align-items:center;gap:6px}
+
+/* ===================== REFLEXIÓN ===================== */
+.refl{flex:1;display:flex;flex-direction:column;justify-content:center}
+.refl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.refl-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px 17px;transition:.3s var(--ease);position:relative;overflow:hidden}
+.refl-card:hover{transform:translateY(-5px);box-shadow:var(--sh)}
+.refl-card .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;margin-bottom:13px;font-size:17px;color:#fff}
+.refl-card h3{font-family:'Schibsted Grotesk';font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);margin-bottom:8px;line-height:1.05}
+.refl-card p{color:var(--slate);font-size:12px;line-height:1.5;text-align:justify}
+.refl-foot{text-align:center;color:var(--slate-soft);font-size:11px;font-family:'Inter';margin-top:20px;letter-spacing:.03em}
+
+/* ===================== CIERRE ===================== */
+#s-end{background:var(--navy);color:#fff}
+#s-end .e{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 60px}
+#s-end .ce{color:var(--gold-soft);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;font-family:'Inter';margin-bottom:22px}
+#s-end h2{font-family:'Schibsted Grotesk';font-weight:600;font-size:74px;text-transform:uppercase;line-height:.94;letter-spacing:.5px}
+#s-end h2 .g{color:var(--gold)}
+#s-end p{color:rgba(255,255,255,.72);font-size:15px;line-height:1.62;max-width:500px;margin:24px auto 0}
+#s-end .sign{margin-top:30px;display:flex;flex-direction:column;gap:5px;align-items:center}
+#s-end .sign .n{font-family:'Schibsted Grotesk';font-weight:600;font-size:19px;letter-spacing:.5px}
+#s-end .sign .id{font-family:'Inter';font-size:12px;color:var(--gold-soft);letter-spacing:.07em}
+
+/* ===================== MODAL (demos) ===================== */
+.modal{position:fixed;inset:0;z-index:120;background:rgba(11,17,33,.78);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:34px;opacity:0;transition:opacity .3s var(--ease)}
+.modal.open{display:flex;opacity:1}
+.mcard{background:var(--paper);width:min(940px,96vw);max-height:92vh;border-radius:16px;overflow:hidden;box-shadow:0 40px 110px -30px rgba(0,0,0,.7);transform:translateY(14px) scale(.98);transition:.4s var(--ease);display:flex;flex-direction:column;border-top:5px solid var(--accent)}
+.modal.open .mcard{transform:none}
+.mhead{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 28px 18px;border-bottom:1px solid var(--line)}
+.mhead .eb{font-family:'Inter';font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-d);margin-bottom:7px}
+.mhead h3{font-family:'Schibsted Grotesk';font-weight:600;font-size:27px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);line-height:1}
+.mhead .st{font-size:13px;color:var(--slate);margin-top:7px;font-family:'Inter';font-style:italic}
+.mclose{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line-2);background:#fff;color:var(--navy);font-size:17px;cursor:pointer;display:grid;place-items:center;transition:.25s var(--ease);flex:none}
+.mclose:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.mbody{padding:24px 28px 26px;overflow-y:auto}
+.dato{margin-top:20px;display:flex;gap:14px;align-items:flex-start;background:rgba(201,154,79,.08);border:1px solid rgba(201,154,79,.28);border-radius:11px;padding:15px 17px}
+.dato .b{flex:none;font-family:'Schibsted Grotesk';font-weight:700;font-size:10px;letter-spacing:.12em;color:#fff;background:var(--accent);padding:4px 8px;border-radius:5px;margin-top:2px}
+.dato p{font-size:13px;color:var(--ink);line-height:1.55}
+.dato p b{color:var(--accent-d)}
+
+/* demo shared */
+.demo{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:18px}
+.tabs{display:flex;flex-wrap:wrap;gap:7px}
+.tb{font-family:'Inter';font-size:11px;letter-spacing:.03em;padding:7px 13px;border-radius:7px;border:1.5px solid var(--line-2);background:#fff;color:var(--slate);cursor:pointer;transition:.22s var(--ease)}
+.tb:hover{border-color:var(--accent)}
+.tb.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.demo-stage{min-height:210px;display:flex;align-items:center;justify-content:center;background:var(--cream);border-radius:9px;padding:18px;position:relative;overflow:hidden}
+.demo-cap{font-size:13px;color:var(--slate);line-height:1.5;text-align:center}
+.demo-cap b{color:var(--navy)}
+
+/* I · clasificador */
+.clf-svg{transition:opacity .35s var(--ease)}
+/* II · significado */
+.sig2{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.sig2 .field{width:180px;height:130px;border-radius:12px;display:grid;place-items:center;transition:.4s var(--ease);background:#fff;border:1px solid var(--line)}
+.sig2 .field .o{width:74px;height:74px;border-radius:50%;background:#D7402F;transition:.4s var(--ease)}
+.sig2 .read{text-align:center}
+.sig2 .read .big{font-family:'Schibsted Grotesk';font-weight:600;font-size:24px;text-transform:uppercase;color:var(--navy);letter-spacing:.4px;transition:.3s}
+.sig2 .read .sm{font-size:12px;color:var(--slate);margin-top:5px;font-style:italic;font-family:'Inter'}
+/* III · espacio */
+.ws-frame{position:relative;width:360px;height:222px;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm);flex:none}
+.ws{position:absolute;inset:0;--pad:11px;--gap:8px;--th:7px;background:#fff;padding:var(--pad);display:flex;flex-direction:column;gap:var(--gap);transition:padding .12s linear,gap .12s linear;overflow:hidden}
+.ws .bar,.ws .ttl{height:var(--th);transition:height .12s linear}
+.ws .bar{background:var(--slate-soft);border-radius:3px}
+.ws .ttl{height:calc(var(--th) + 8px);background:var(--navy);border-radius:3px;width:62%}
+.ws .img{height:72px;background:var(--gold);border-radius:5px;transition:height .12s linear}
+.ws .bar.s{width:88%}.ws .bar.m{width:96%}.ws .bar.l{width:70%}
+.ws-ovl{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s var(--ease)}
+.ws-ovl.on{opacity:1}
+.ws-ctl{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;margin-top:4px}
+.ws-ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ws-ctl .lbl{display:flex;justify-content:space-between;font-family:'Inter';font-size:10.5px;color:var(--slate-soft);text-transform:uppercase;letter-spacing:.08em}
+.ws-ctl .lbl b{color:var(--accent-d)}
+.ovl-btns{display:flex;gap:7px;justify-content:center}
+/* IV · boceto */
+.sk{width:248px;height:188px;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:9px;position:relative;transition:.35s var(--ease)}
+/* nivel 1 · miniatura: trazo suelto, gris, baja fidelidad */
+.sk.s1{background:#f3f1ea;border:2px dashed #b9bdc8;transform:rotate(-1deg)}
+.sk.s1 .b{background:#c8ccd4;border-radius:6px}
+.sk.s1 .bttl{height:22px;width:55%}
+.sk.s1 .bimg{height:70px;border-radius:8px}
+.sk.s1 .row{display:flex;gap:8px}.sk.s1 .row .b{flex:1;height:26px}
+.sk.s1 .scrib{height:6px;background:repeating-linear-gradient(90deg,#c8ccd4 0 14px,transparent 14px 20px);border-radius:0}
+/* nivel 2 · preparatorio: estructura, hairlines, medidas */
+.sk.s2{background:#fff;border:1px solid #9aa3b5;box-shadow:0 0 0 4px rgba(154,163,181,.08)}
+.sk.s2 .b{background:none;border:1px solid #aab1c0;border-radius:3px}
+.sk.s2 .bttl{height:16px;width:62%;border:1px solid #7c869b}
+.sk.s2 .bimg{height:60px;background:repeating-linear-gradient(135deg,#eef0f4 0 6px,#fff 6px 12px)}
+.sk.s2 .bl{height:6px;border:none;background:#cdd2db}
+.sk.s2 .bl.w1{width:100%}.sk.s2 .bl.w2{width:88%}.sk.s2 .bl.w3{width:66%}
+.sk.s2 .tick{position:absolute;top:14px;right:-22px;width:14px;height:60px;border-top:1px solid #9aa3b5;border-bottom:1px solid #9aa3b5;border-right:1px solid #9aa3b5}
+.sk.s2 .gl{position:absolute;left:14px;right:14px;top:50%;border-top:1px dashed #c3c8d3}
+/* nivel 3 · exhaustivo: pieza final a color */
+.sk.s3{background:#fff;border:1px solid var(--line);box-shadow:var(--sh)}
+.sk.s3 .bttl{height:18px;width:60%;background:var(--navy);border-radius:3px}
+.sk.s3 .sub{height:7px;width:40%;background:var(--gold);border-radius:3px}
+.sk.s3 .bimg{height:66px;background:linear-gradient(135deg,var(--gold),#b07f33);border-radius:5px;position:relative;overflow:hidden}
+.sk.s3 .bimg:after{content:"";position:absolute;right:-14px;bottom:-14px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.18)}
+.sk.s3 .bl{height:5px;background:#cdd2db;border-radius:3px}
+.sk.s3 .bl.w1{width:100%}.sk.s3 .bl.w2{width:90%}.sk.s3 .bl.w3{width:74%}
+.sk.s3 .cta{height:14px;width:42px;background:var(--green);border-radius:4px;margin-top:2px}
+.stepper{display:flex;gap:0;align-items:center;justify-content:center;width:100%;max-width:380px;margin:0 auto}
+.stepper .st{flex:1;text-align:center;cursor:pointer}
+.stepper .st .d{width:26px;height:26px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;margin:0 auto 6px;font-family:'Schibsted Grotesk';font-weight:700;font-size:12px;color:var(--slate-soft);background:#fff;transition:.25s}
+.stepper .st.on .d{border-color:var(--accent);color:#fff;background:var(--accent)}
+.stepper .st .t{font-family:'Inter';font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--slate-soft)}
+.stepper .st.on .t{color:var(--accent-d)}
+.stepper .line{height:2px;background:var(--line-2);flex:.6;margin-top:-20px}
+/* V · principios */
+.pv{display:grid;grid-template-columns:170px 1fr;gap:18px}
+.pv-rail{display:flex;flex-direction:column;gap:5px}
+.pv-rail button{text-align:left;font-family:'Schibsted Grotesk';font-weight:500;font-size:14px;text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;border-radius:8px;border:none;background:transparent;color:var(--slate);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:9px}
+.pv-rail button .n{font-family:'Inter';font-size:10px;color:var(--slate-soft)}
+.pv-rail button:hover{background:rgba(27,39,69,.05)}
+.pv-rail button.on{background:var(--accent);color:#fff}
+.pv-rail button.on .n{color:rgba(255,255,255,.7)}
+.pv-panel{background:var(--cream);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-height:250px}
+.pv-def{font-size:13px;color:var(--slate);line-height:1.5}.pv-def b{color:var(--navy)}
+.pv-demo{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;min-height:150px}
+.pv-sub{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.pv-sub button{font-family:'Inter';font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--line-2);background:#fff;color:var(--slate);cursor:pointer}
+.pv-sub button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ===================== LIGHTBOX ===================== */
+.lb{position:fixed;inset:0;z-index:200;background:rgba(11,16,32,.93);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:54px 72px}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:100%;border-radius:5px;box-shadow:0 30px 80px -20px rgba(0,0,0,.7);object-fit:contain}
+.lb-x{position:absolute;top:20px;right:24px;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:19px;cursor:pointer;display:grid;place-items:center;transition:.25s}
+.lb-x:hover{background:#fff;color:var(--navy)}
+.lb-a{position:absolute;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:rgba(0,0,0,.25);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;transition:.25s}
+.lb-a:hover{background:#fff;color:var(--navy)}
+.lb-p{left:20px}.lb-n{right:20px}
+.lb-c{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.8);font-family:'Inter';font-size:12px;letter-spacing:.05em;text-align:center}
+.lb-c b{color:var(--gold-soft)}
+
+/* small screens */
+@media(max-width:760px){
+  .hud .hint{display:none}
+  .hud.top{height:54px}.hud.bot{height:62px}
+  .dots{max-width:46vw;overflow:hidden}
+  .pv{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.1s!important}
+  .sig-ring{stroke-dashoffset:0}[data-reveal]{opacity:1!important;transform:none!important}
+}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ===================== Credivance restyle pass ===================== */
+.cvx{position:absolute;inset:0;color:#fff;overflow:hidden}
+.cvx-arrows{position:absolute;top:98px;right:54px;width:300px;height:150px;opacity:.08}
+.cvx-frame{position:absolute;left:-80px;top:162px;width:560px;height:300px;border:1px solid rgba(255,255,255,.12)}
+.cvx-diag{position:absolute;inset:0;width:100%;height:100%}
+.cvx-hd{position:absolute;top:46px;left:56px;right:56px;display:flex;align-items:flex-start;justify-content:space-between;z-index:2}
+.cvx-wm{font-family:'Schibsted Grotesk';font-weight:500;font-size:20px;letter-spacing:-.3px;display:inline-flex;align-items:flex-start;gap:2px}
+.cvx-wm .arr{font-size:13px;font-weight:600;position:relative;top:-1px}
+.cvx-rt{text-align:right;font-size:10.5px;line-height:1.65;color:rgba(255,255,255,.5);letter-spacing:.03em}
+.cvx-body{position:absolute;left:56px;bottom:158px;max-width:780px;z-index:2}
+.cvx-ce{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:20px;font-weight:500}
+.cvx-title{font-family:'Schibsted Grotesk';font-weight:400;font-size:62px;line-height:1.03;letter-spacing:-1.4px;color:#fff}
+.cvx-lede{max-width:440px;color:rgba(255,255,255,.6);font-size:15px;line-height:1.62;margin-top:22px}
+.cvx-meta{position:absolute;left:56px;right:56px;bottom:52px;display:grid;grid-template-columns:repeat(4,auto);gap:0 48px;justify-content:start;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);z-index:2}
+.cvx-meta .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:7px}
+.cvx-meta .v{font-size:13px;color:#fff;font-weight:500;line-height:1.3}
+.brand .wm{font-family:'Schibsted Grotesk';font-weight:500;font-size:14px;color:#fff;letter-spacing:-.2px;display:inline-flex;gap:3px;align-items:flex-start}
+.brand .wm .arr{font-size:10px}
+/* tipografía: title case, ligera, tracking ajustado */
+.sec-h h2,.u-act,#s-end h2,.pres-b h2{text-transform:none;font-weight:400;letter-spacing:-.6px}
+.sec-h h2{font-size:38px;line-height:1.02}
+.u-act{font-size:27px;line-height:1.05}
+#s-end h2{font-size:58px;line-height:1}
+.pres-b h2{font-size:33px}
+.refl-card h3,.mhead h3{text-transform:none;font-weight:600;letter-spacing:-.2px}
+.mhead h3{font-size:26px}
+.pp .nm .n{text-transform:none;font-weight:500;letter-spacing:-.3px}
+.u-bignum{font-weight:400}
+.runhdr .l .um{font-weight:600}
+/* índice: tarjetas navy fintech */
+.idx-line{display:none}
+.idx-card{background:var(--navy);border:none;border-radius:2px;color:#fff;padding:18px 16px}
+.idx-card:hover{transform:translateY(-6px);box-shadow:0 22px 46px -22px rgba(9,21,64,.6)}
+.idx-card:before{background:#fff;opacity:.55}
+.idx-card:after{content:"";position:absolute;right:14px;top:54px;width:60px;height:42px;background:rgba(255,255,255,.06)}
+.idx-num{border:1px solid rgba(255,255,255,.32);border-radius:0;color:#fff;background:transparent;width:38px;height:38px;font-weight:400;font-size:17px}
+.idx-unit{color:rgba(255,255,255,.5)}
+.idx-theme{color:#fff;font-weight:500}
+.idx-act{color:rgba(255,255,255,.58);font-style:normal}
+.idx-go{color:#fff}
+.idx-card:focus-visible{outline-color:#fff}
+/* reflexión: tarjetas claras con ícono navy cuadrado */
+.refl-card{border-radius:2px}
+.refl-card .ic{border-radius:2px;background:var(--navy)!important}
+/* afinado general de bordes (esquinas más rectas, fintech) */
+.stage{border-radius:4px}
+.thumb{border-radius:2px}
+.chip,.tag,.tb,.explore,.pv-rail button,.pv-sub button,.idx-go{border-radius:3px}
+.mcard{border-radius:6px}
+.sec-h h2 .mark:after{background:rgba(44,70,192,.14)}
+.grain:after{opacity:.26}
+
+</style>
+</head>
+<body>
+
+<header class="hud top">
+  <div class="brand"><span class="wm">Norman Valenzuela <span class="arr">↗</span></span></div>
+  <div class="counter mono"><b id="cur">01</b> / <span id="tot">10</span></div>
+</header>
+
+<div class="stage-wrap">
+<div class="stage" id="stage">
+
+  <!-- 0 · COVER -->
+  <section class="slide" id="s-cover" aria-label="Portada">
+    <div class="cvx">
+      <svg class="cvx-arrows" viewBox="0 0 300 150" aria-hidden="true">
+        <defs><pattern id="arw" width="50" height="50" patternUnits="userSpaceOnUse">
+          <line x1="15" y1="36" x2="35" y2="16" stroke="#fff" stroke-width="5"/>
+          <path d="M24 16 H36 V28" fill="none" stroke="#fff" stroke-width="5"/>
+        </pattern></defs>
+        <rect width="300" height="150" fill="url(#arw)"/>
+      </svg>
+      <div class="cvx-frame"></div>
+      <svg class="cvx-diag" viewBox="0 0 1280 720" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="700" y1="760" x2="1360" y2="300" stroke="rgba(255,255,255,.10)" stroke-width="1"/>
+        <line x1="560" y1="780" x2="1220" y2="360" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+      </svg>
+      <header class="cvx-hd">
+        <div class="cvx-wm">Norman Valenzuela <span class="arr">↗</span></div>
+        <div class="cvx-rt">UMECIT · Expresión del Diseño Gráfico I<br>Portafolio Digital · 2026</div>
+      </header>
+      <div class="cvx-body">
+        <div class="cvx-ce" data-reveal style="--d:0">Proyecto Integrador · Unidades I a la V</div>
+        <h1 class="cvx-title" data-reveal style="--d:1">Portafolio Digital<br>Interactivo</h1>
+        <p class="cvx-lede" data-reveal style="--d:2">Un recorrido por las cinco unidades del curso: de la imagen visual a los principios que ordenan toda composición.</p>
+      </div>
+      <div class="cvx-meta" data-reveal style="--d:3">
+        <div><div class="k">Estudiante</div><div class="v">Norman Valenzuela C.</div></div>
+        <div><div class="k">Cédula</div><div class="v">4-798-613</div></div>
+        <div><div class="k">Docente</div><div class="v">Yovana I. García R.</div></div>
+        <div><div class="k">Unidades</div><div class="v">I a la V</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 · ÍNDICE -->
+  <section class="slide grain" aria-label="Recorrido del curso">
+    <div class="canvas">
+      <div class="runhdr"><div class="l"><span class="um disp">UM<b>·</b></span> Expresión del Diseño Gráfico I</div><div class="l">El recorrido</div></div>
+      <div class="sec-h">
+        <div class="eyebrow" data-reveal style="--d:0">Índice del semestre</div>
+        <h2 data-reveal style="--d:1">Cinco unidades, <span class="mark">un sistema</span></h2>
+        <p class="sub" data-reveal style="--d:2">Cada unidad aportó una pieza al lenguaje del diseño. Elige una para entrar a su actividad, su evidencia, su demo y lo aprendido.</p>
+      </div>
+      <div class="idx-wrap"><div class="idx-line"></div><div class="idx-grid" id="idxGrid"></div></div>
+      <div class="runfoot"><span>Norman Valenzuela · UMECIT</span><span class="folio disp">ÍNDICE</span></div>
+    </div>
+  </section>
+
+  <!-- 2 · PRESENTACIÓN -->
+  <section class="slide grain" aria-label="Presentación personal">
+    <div class="canvas">
+      <div class="runhdr"><div class="l"><span class="um disp">UM<b>·</b></span> Expresión del Diseño Gráfico I</div><div class="l">00 · Presentación</div></div>
+      <div class="pres">
+        <div class="pp" data-reveal style="--d:0">
+          <span class="tagmk mono">// estudiante</span><span class="ring"></span>
+          <span class="ini disp">NV</span>
+          <div class="nm"><div class="n disp">Norman<br>Valenzuela</div><div class="r">Lic. en Diseño Gráfico · UMECIT</div></div>
+        </div>
+        <div class="pres-b">
+          <div class="eyebrow" data-reveal style="--d:1">Presentación personal</div>
+          <h2 data-reveal style="--d:2">Diseñar es pensar con intención</h2>
+          <p data-reveal style="--d:3">Soy <b>Norman Valenzuela Castro</b>, diseñador UX con más de cinco años de experiencia y desarrollador aficionado. Trabajo el diseño desde una mirada de sistema: la tipografía, el color, la retícula y la composición no son adornos, sino decisiones que hacen que un mensaje comunique con claridad. Conoce mi trabajo en <a href="https://normanvalenzuela.com" target="_blank" rel="noopener">normanvalenzuela.com</a>.</p>
+          <div class="ficha" data-reveal style="--d:4">
+            <div class="it"><div class="k">Ubicación</div><div class="v">David, Chiriquí · Panamá</div></div>
+            <div class="it"><div class="k">Enfoque</div><div class="v">Diseño UX · desarrollo</div></div>
+            <div class="it"><div class="k">Curso</div><div class="v">Expresión del Diseño Gráfico I</div></div>
+          </div>
+          <p data-reveal style="--d:5">Este curso me permitió volver a los fundamentos del diseño gráfico con una mirada formal y reforzar el porqué detrás de cada decisión visual. Este portafolio reúne ese proceso: lo que hice, cómo lo pensé y lo que me llevo de la experiencia.</p>
+          <div class="pres-tags" data-reveal style="--d:6"><span class="tag">Imagen visual</span><span class="tag">Tipografía</span><span class="tag">Composición</span><span class="tag">Color</span><span class="tag">Proporción</span><span class="tag">Sistemas</span></div>
+        </div>
+      </div>
+      <div class="runfoot"><span>Norman Valenzuela · UMECIT</span><span class="folio disp">00</span></div>
+    </div>
+  </section>
+
+  <!-- 3-7 · UNIDADES -->
+  <section class="slide grain" data-unit="0" aria-label="Unidad I"></section>
+  <section class="slide grain" data-unit="1" aria-label="Unidad II"></section>
+  <section class="slide grain" data-unit="2" aria-label="Unidad III"></section>
+  <section class="slide grain" data-unit="3" aria-label="Unidad IV"></section>
+  <section class="slide grain" data-unit="4" aria-label="Unidad V"></section>
+
+  <!-- 8 · REFLEXIÓN -->
+  <section class="slide grain" aria-label="Reflexión final">
+    <div class="canvas">
+      <div class="runhdr"><div class="l"><span class="um disp">UM<b>·</b></span> Expresión del Diseño Gráfico I</div><div class="l">Cierre del proceso</div></div>
+      <div class="refl">
+        <div class="sec-h" style="text-align:center">
+          <div class="eyebrow" data-reveal style="--d:0">Cierre del proceso</div>
+          <h2 data-reveal style="--d:1">Reflexión final</h2>
+        </div>
+        <div class="refl-grid">
+          <div class="refl-card" data-reveal style="--d:2"><div class="ic" style="background:var(--gold)">↗</div><h3>Crecimiento</h3><p>Empecé acomodando elementos por intuición y termino diseñando con criterio. Aprendí a justificar cada decisión visual, leer una composición y corregirla. Mi identidad navy y dorado, consolidada en la Unidad V, es prueba de esa evolución.</p></div>
+          <div class="refl-card" data-reveal style="--d:3"><div class="ic" style="background:var(--green)">◆</div><h3>Conocimientos</h3><p>Hoy manejo la imagen visual y sus tipos, la relación ilustración y palabra, los elementos del lenguaje visual, la comunicación impresa y los siete principios del diseño. Es la base teórica de todo lo que cree de aquí en adelante.</p></div>
+          <div class="refl-card" data-reveal style="--d:4"><div class="ic" style="background:var(--navy)">✦</div><h3>Fortalezas</h3><p>Desarrollé jerarquía tipográfica, uso del espacio en blanco, coherencia de sistema y proporción. También un método: bocetar antes del software y revisar el diseño a distancia para verificar que la jerarquía guíe la mirada.</p></div>
+          <div class="refl-card" data-reveal style="--d:5"><div class="ic" style="background:var(--gold-deep)">◎</div><h3>El diseño y la comunicación</h3><p>El diseño gráfico no decora: ordena el mensaje y dirige la atención. Una buena composición comunica sin esfuerzo y deja huella. Esa es la responsabilidad del diseñador y la razón por la que elegí esta carrera.</p></div>
+        </div>
+      </div>
+      <div class="runfoot"><span>Norman Valenzuela · UMECIT</span><span class="folio disp">REFLEXIÓN</span></div>
+    </div>
+  </section>
+
+  <!-- 9 · CIERRE -->
+  <section class="slide" id="s-end" aria-label="Cierre">
+    <div class="e">
+      <div class="ce" data-reveal style="--d:0">Expresión del Diseño Gráfico I · 2026</div>
+      <h2 data-reveal style="--d:1">De elementos sueltos<br>a un mensaje con <span class="g">intención</span></h2>
+      <p data-reveal style="--d:2">Gracias por recorrer este portafolio. Cada unidad fue un paso, y juntas forman el inicio de mi camino como diseñador gráfico.</p>
+      <div class="sign" data-reveal style="--d:3"><span class="n disp">Norman Valenzuela Castro</span><span class="id mono">4-798-613 · UMECIT</span></div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<footer class="hud bot">
+  <div class="hint mono"><span><kbd>←</kbd> <kbd>→</kbd> navegar</span><span><kbd>Esc</kbd> cerrar</span></div>
+  <div class="dots" id="dots" role="tablist" aria-label="Navegación"></div>
+  <div class="nav-btns"><button class="nav-btn" id="prev" aria-label="Anterior">‹</button><button class="nav-btn" id="next" aria-label="Siguiente">›</button></div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Demo interactiva">
+  <div class="mcard" id="mcard"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Vista ampliada">
+  <button class="lb-x" id="lbX" aria-label="Cerrar">✕</button>
+  <button class="lb-a lb-p" id="lbP" aria-label="Anterior">‹</button>
+  <img id="lbImg" src="" alt="Evidencia ampliada">
+  <button class="lb-a lb-n" id="lbN" aria-label="Siguiente">›</button>
+  <div class="lb-c mono" id="lbC"></div>
+</div>
+
+<script>
+const EVID = {"u1_glosario": ["./assets/u1_glosario-1.jpg", "./assets/u1_glosario-2.jpg", "./assets/u1_glosario-3.jpg", "./assets/u1_glosario-4.jpg", "./assets/u1_glosario-5.jpg", "./assets/u1_glosario-6.jpg"], "u2_mapa": ["./assets/u2_mapa-1.jpg"], "u3_ensayo": ["./assets/u3_ensayo-1.jpg", "./assets/u3_ensayo-2.jpg", "./assets/u3_ensayo-3.jpg", "./assets/u3_ensayo-4.jpg", "./assets/u3_ensayo-5.jpg"], "u4_parcial": ["./assets/u4_parcial-1.jpg", "./assets/u4_parcial-2.jpg", "./assets/u4_parcial-3.jpg"], "u5_principios": ["./assets/u5_principios-1.jpg", "./assets/u5_principios-2.jpg", "./assets/u5_principios-3.jpg", "./assets/u5_principios-4.jpg", "./assets/u5_principios-5.jpg", "./assets/u5_principios-6.jpg"]};
+const CAPS = {
+  u1_glosario:["Portada","Presentación · términos 1–2","Términos 3–4","Términos 5–6","Términos 7–8","Términos 9–10"],
+  u2_mapa:["Mapa mental completo"],
+  u3_ensayo:["Portada","Tipografía · Figura 1","Imagen y espacio en blanco","Coherencia · Conclusiones","Recomendaciones · Galería"],
+  u4_parcial:["Parte I · Selección múltiple","Partes II y III","Parte IV · Análisis práctico"],
+  u5_principios:["Portada","Introducción · Estilo","Contraste","Equilibrio · Proporción","Ritmo · Armonía","Unidad · Cierre"]
+};
+const UNITS=[
+ {key:"u1_glosario",roman:"I",unit:"Unidad I",theme:"La imagen visual como medio de comunicación",act:"Glosario Creativo: La Imagen Visual",accent:"#2C46C0",accentD:"#16225E",flip:false,demo:"clasificador",demoName:"Clasificador de imágenes",
+  proceso:"Seleccioné diez términos clave del tema y diseñé cada uno con tratamiento tipográfico propio e ilustración que traduce el concepto a una forma gráfica simple, con la lógica de una revista de diseño. La idea: que cada palabra se entienda por su definición y por su imagen.",
+  conceptos:["Jerarquía tipográfica","Sistema visual","Ilustración con función","Retícula editorial","Composición"],
+  aprend:"Una imagen comunica antes de leerse, y un documento se sostiene como sistema, no como piezas sueltas. Aprendí a equilibrar texto e imagen para reforzar un mismo mensaje."},
+ {key:"u2_mapa",roman:"II",unit:"Unidad II",theme:"El diseño como combinación de ilustraciones y palabras",act:"Mapa Mental: Ilustración + Palabra",accent:"#2C46C0",accentD:"#16225E",flip:true,demo:"significado",demoName:"El peso de la palabra",
+  proceso:"Organicé el tema de forma radial alrededor de la idea central. Seis ramas con el color como código, conectores curvos y casos reales (Selleys, Mentos, TD) ordenan la información y guían la lectura por jerarquía de tamaño y posición.",
+  conceptos:["Significado denotativo","Connotativo y abstracto","Color como código","Jerarquía visual","Relación imagen–texto"],
+  aprend:"Comprendí cómo texto e imagen se refuerzan y los tres niveles de significado. Sintetizar el tema en un mapa me enseñó a dirigir la mirada con color y posición."},
+ {key:"u3_ensayo",roman:"III",unit:"Unidad III",theme:"Elementos del lenguaje visual y la proporción",act:"Ensayo Creativo: La Proporción Visual",accent:"#2C46C0",accentD:"#16225E",flip:false,demo:"espacio",demoName:"El espacio que respira",
+  proceso:"Escribí un ensayo con figuras propias sobre cómo la tipografía, la ilustración, el espacio en blanco y el boceto dialogan hasta lograr proporción visual. Incluí portada, introducción, desarrollo, conclusiones, recomendaciones y galería.",
+  conceptos:["Proporción visual","Espacio en blanco","Jerarquía tipográfica","Regla de los tercios","Proporción áurea 1:1.618"],
+  aprend:"La proporción es un diálogo, no una fórmula. El espacio en blanco es un elemento activo que jerarquiza, y bocetar antes del software previene errores costosos."},
+ {key:"u4_parcial",roman:"IV",unit:"Unidad IV",theme:"Integración de los elementos en la comunicación impresa",act:"Parcial: Comunicación Impresa",accent:"#2C46C0",accentD:"#16225E",flip:true,demo:"boceto",demoName:"Del boceto al diseño",
+  proceso:"Resolví el parcial aplicando los componentes de la comunicación impresa a un caso real de folleto: selección múltiple, verdadero o falso, relación de columnas y un análisis donde justifiqué titular, ilustraciones, espacio en blanco y tipo de boceto.",
+  conceptos:["Tipo común y titulares","Ilustraciones","Espacio en blanco","Bocetos: de miniatura a exhaustivo","Composición"],
+  aprend:"Cada componente impreso cumple un rol y el espacio en blanco no se desperdicia, organiza. El boceto exhaustivo es el puente entre la idea y el diseño final."},
+ {key:"u5_principios",roman:"V",unit:"Unidad V",theme:"Principios fundamentales del diseño gráfico",act:"Análisis de los Principios del Diseño",accent:"#2C46C0",accentD:"#16225E",flip:false,demo:"principios",demoName:"Los siete principios, en vivo",
+  proceso:"Documento editorial con portada, introducción y una sección por principio, cada uno con un ejemplo visual original. Aquí consolidé mi identidad de marca navy y dorado, la misma que da tono a todo este portafolio.",
+  conceptos:["Estilo","Contraste","Equilibrio","Proporción","Ritmo","Armonía","Unidad"],
+  aprend:"Los siete principios no actúan por separado, se sostienen entre sí. Dominarlos es pasar de acomodar elementos a comunicar con propósito, donde cada decisión responde a una razón.",
+  clickChips:true}
+];
+
+/* ---------- ÍNDICE ---------- */
+const idxGrid=document.getElementById('idxGrid');
+UNITS.forEach((u,i)=>{
+  const c=document.createElement('button');c.className='idx-card';c.style.setProperty('--accent',u.accent);
+  c.innerHTML=`<div class="idx-num disp">${u.roman}</div><div class="idx-unit mono">${u.unit}</div><div class="idx-theme">${u.theme}</div><div class="idx-act">${u.act}</div><div class="idx-go mono">Ver actividad →</div>`;
+  c.onclick=()=>go(3+i);c.setAttribute('data-reveal','');c.style.setProperty('--d',3+i);
+  idxGrid.appendChild(c);
+});
+
+/* ---------- UNIDADES ---------- */
+const folioMap=["01","02","03","04","05"];
+document.querySelectorAll('[data-unit]').forEach(sec=>{
+  const u=UNITS[+sec.dataset.unit];
+  const imgs=EVID[u.key]||[];
+  const gcls=imgs.length>=6?'g6':imgs.length>=4?'g5':imgs.length>=2?'g3':'g1';
+  const thumbs=imgs.map((src,k)=>`<div class="thumb" data-doc="${u.key}" data-i="${k}" tabindex="0" role="button" aria-label="Ampliar ${CAPS[u.key][k]||'evidencia'}"><img src="${src}" alt="${u.act} — ${CAPS[u.key][k]||''}" loading="lazy"><span class="cap mono">${CAPS[u.key][k]||''}</span><span class="zi">⤢</span></div>`).join('');
+  const chipsCls=u.clickChips?'chip click':'chip';
+  const chips=u.conceptos.map((c,ci)=>`<span class="${chipsCls}" ${u.clickChips?`data-prin="${ci}"`:''}>${c}</span>`).join('');
+  sec.innerHTML=`<div class="canvas" style="--accent:${u.accent};--accent-d:${u.accentD}">
+    <div class="runhdr"><div class="l"><span class="um disp">UM<b>·</b></span> Expresión del Diseño Gráfico I</div><div class="l">${u.unit} · Evidencia</div></div>
+    <div class="unit ${u.flip?'flip':''}">
+      <div class="u-info">
+        <div class="u-top" data-reveal style="--d:0"><div class="u-bignum disp">${u.roman}</div><div><div class="u-tag mono">${u.unit} · Actividad evaluativa</div><div class="u-theme">${u.theme}</div></div></div>
+        <h2 class="u-act disp" data-reveal style="--d:1">${u.act}</h2>
+        <div class="u-block" data-reveal style="--d:2"><div class="h">Proceso creativo</div><p>${u.proceso}</p></div>
+        <div class="u-block" data-reveal style="--d:3"><div class="h">Conceptos aplicados${u.clickChips?' · clic para verlos en vivo':''}</div><div class="chips">${chips}</div></div>
+        <button class="explore" data-demo="${u.demo}" data-reveal style="--d:4"><span class="pl">▷</span> Demo interactiva · ${u.demoName}</button>
+        <div class="u-block" data-reveal style="--d:5"><div class="h">Aprendizajes</div><p>${u.aprend}</p></div>
+      </div>
+      <div class="u-evid" data-reveal style="--d:2">
+        <div class="h"><span>Evidencia del trabajo</span><span class="stamp disp">Entregado</span></div>
+        <div class="gallery ${gcls}">${thumbs}</div>
+        <div class="g-note mono"><span>⤢</span> Clic en cualquier página para ampliar</div>
+      </div>
+    </div>
+    <div class="runfoot"><span>Norman Valenzuela · UMECIT</span><span class="folio disp">${folioMap[+sec.dataset.unit]}</span></div>
+  </div>`;
+});
+
+/* ---------- DECK ---------- */
+const stage=document.getElementById('stage');
+const slides=[...document.querySelectorAll('.slide')];
+const dotsWrap=document.getElementById('dots');
+const prevB=document.getElementById('prev'),nextB=document.getElementById('next');
+const curEl=document.getElementById('cur'),totEl=document.getElementById('tot');
+let idx=0;
+totEl.textContent=String(slides.length).padStart(2,'0');
+slides.forEach((s,i)=>{const d=document.createElement('button');d.className='dot';d.setAttribute('role','tab');d.setAttribute('aria-label','Slide '+(i+1));d.onclick=()=>go(i);dotsWrap.appendChild(d);});
+const dots=[...dotsWrap.children];
+function go(i){
+  i=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+  dots.forEach((d,k)=>d.classList.toggle('active',k===i));
+  idx=i;curEl.textContent=String(i+1).padStart(2,'0');
+  prevB.disabled=i===0;nextB.disabled=i===slides.length-1;
+}
+prevB.onclick=()=>go(idx-1);nextB.onclick=()=>go(idx+1);
+function fit(){
+  const ww=innerWidth,wh=innerHeight;
+  const small=ww<760;
+  const padX=small?14:46,padT=small?54:64,padB=small?62:72;
+  const availW=ww-padX*2,availH=wh-padT-padB;
+  const s=Math.min(availW/1280,availH/720);
+  stage.style.top=(padT+availH/2)+'px';
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+}
+addEventListener('resize',fit);fit();go(0);
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('modal').classList.contains('open')||document.getElementById('lb').classList.contains('open'))return;
+  if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(idx+1);}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(idx-1);}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+});
+let tx=0;
+stage.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+stage.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?go(idx+1):go(idx-1);}},{passive:true});
+
+/* ---------- LIGHTBOX ---------- */
+const lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg'),lbC=document.getElementById('lbC');
+let lbDoc=null,lbI=0;
+function openLB(d,i){lbDoc=d;lbI=i;lb.classList.add('open');renderLB();}
+function renderLB(){const a=EVID[lbDoc]||[];lbImg.src=a[lbI];lbC.innerHTML=`<b>${CAPS[lbDoc][lbI]||''}</b> · ${lbI+1} / ${a.length}`;const m=a.length>1?'visible':'hidden';document.getElementById('lbP').style.visibility=m;document.getElementById('lbN').style.visibility=m;}
+function closeLB(){lb.classList.remove('open');lbImg.src='';}
+function lbStep(d){const a=EVID[lbDoc]||[];lbI=(lbI+d+a.length)%a.length;renderLB();}
+document.getElementById('lbX').onclick=closeLB;document.getElementById('lbP').onclick=()=>lbStep(-1);document.getElementById('lbN').onclick=()=>lbStep(1);
+lb.onclick=e=>{if(e.target===lb)closeLB();};
+document.addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key==='Escape')closeLB();else if(e.key==='ArrowRight')lbStep(1);else if(e.key==='ArrowLeft')lbStep(-1);});
+
+/* ---------- delegación de clics en el stage ---------- */
+stage.addEventListener('click',e=>{
+  const t=e.target.closest('.thumb');if(t){openLB(t.dataset.doc,+t.dataset.i);return;}
+  const ex=e.target.closest('.explore');if(ex){openDemo(ex.dataset.demo);return;}
+  const ch=e.target.closest('.chip.click');if(ch){openDemo('principios',+ch.dataset.prin);return;}
+});
+stage.addEventListener('keydown',e=>{const th=document.activeElement;if((e.key==='Enter'||e.key===' ')&&th&&th.classList.contains('thumb')){e.preventDefault();openLB(th.dataset.doc,+th.dataset.i);}});
+
+/* ================= DEMOS / MODAL ================= */
+const modal=document.getElementById('modal'),mcard=document.getElementById('mcard');
+function closeModal(){modal.classList.remove('open');mcard.innerHTML='';}
+modal.onclick=e=>{if(e.target===modal)closeModal();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+
+function shell(accent,accentD,eb,title,st,bodyHTML){
+  mcard.style.setProperty('--accent',accent);mcard.style.setProperty('--accent-d',accentD);
+  mcard.innerHTML=`<div class="mhead"><div><div class="eb mono">${eb}</div><h3>${title}</h3><div class="st">${st}</div></div><button class="mclose" id="mClose" aria-label="Cerrar">✕</button></div><div class="mbody">${bodyHTML}</div>`;
+  document.getElementById('mClose').onclick=closeModal;
+  modal.classList.add('open');
+}
+
+function openDemo(kind,arg){
+  if(kind==='clasificador')return demoClasificador();
+  if(kind==='significado')return demoSignificado();
+  if(kind==='espacio')return demoEspacio();
+  if(kind==='boceto')return demoBoceto();
+  if(kind==='principios')return demoPrincipios(arg||0);
+}
+
+/* I · CLASIFICADOR DE IMÁGENES */
+function demoClasificador(){
+  const TYPES=[
+    {n:"Figurativa",d:"Representa la realidad de manera fiel y reconocible.",e:"Retratos, paisajes, fotografías.",
+     svg:`<rect x="40" y="30" width="280" height="200" rx="10" fill="#cfe3f0"/><circle cx="260" cy="80" r="26" fill="#E6B450"/><polygon points="40,230 150,120 230,230" fill="#5b8a6b"/><polygon points="160,230 250,150 320,230" fill="#3f6b54"/><rect x="40" y="210" width="280" height="20" fill="#7a9f86"/>`},
+    {n:"Abstracta",d:"No imita objetos: usa formas, colores y líneas que sugieren ideas o sensaciones.",e:"Arte abstracto, patrones geométricos.",
+     svg:`<rect x="40" y="30" width="280" height="200" rx="10" fill="#f0ece2"/><circle cx="130" cy="100" r="42" fill="#1B2745"/><rect x="180" y="60" width="90" height="90" fill="#C99A4F" transform="rotate(12 225 105)"/><polygon points="90,210 160,150 200,210" fill="#1F9B4E"/><line x1="60" y1="180" x2="300" y2="120" stroke="#1B2745" stroke-width="4"/>`},
+    {n:"Simbólica",d:"Usa símbolos con significado aprendido culturalmente para condensar una idea.",e:"La paloma de la paz, la cruz roja.",
+     svg:`<rect x="40" y="30" width="280" height="200" rx="10" fill="#eef1f4"/><circle cx="180" cy="130" r="74" fill="none" stroke="#1B2745" stroke-width="9"/><line x1="180" y1="56" x2="180" y2="204" stroke="#1B2745" stroke-width="9"/><line x1="180" y1="130" x2="128" y2="182" stroke="#1B2745" stroke-width="9"/><line x1="180" y1="130" x2="232" y2="182" stroke="#1B2745" stroke-width="9"/>`},
+    {n:"Metafórica",d:"Comunica de forma indirecta: lo que se ve sugiere otra cosa.",e:"Una bombilla que representa una idea.",
+     svg:`<rect x="40" y="30" width="280" height="200" rx="10" fill="#fbf4e2"/><path d="M180 70 a48 48 0 0 1 30 86 l0 18 -60 0 0 -18 a48 48 0 0 1 30 -86z" fill="#E6B450" stroke="#a87f38" stroke-width="3"/><rect x="158" y="176" width="44" height="9" rx="3" fill="#a87f38"/><rect x="162" y="189" width="36" height="8" rx="3" fill="#a87f38"/><g stroke="#C99A4F" stroke-width="4" stroke-linecap="round"><line x1="180" y1="34" x2="180" y2="52"/><line x1="120" y1="60" x2="132" y2="72"/><line x1="240" y1="60" x2="228" y2="72"/></g>`}
+  ];
+  const body=`<div class="demo">
+    <div class="tabs" id="clfTabs">${TYPES.map((t,i)=>`<button class="tb ${i===0?'on':''}" data-i="${i}">${t.n}</button>`).join('')}</div>
+    <div class="demo-stage"><svg class="clf-svg" id="clfSvg" viewBox="0 0 360 260" width="320" height="232">${TYPES[0].svg}</svg></div>
+    <div class="demo-cap" id="clfCap"><b>${TYPES[0].n}.</b> ${TYPES[0].d}<br><span style="color:var(--slate-soft);font-size:12px">Ejemplo: ${TYPES[0].e}</span></div>
+  </div>
+  <div class="dato"><span class="b disp">DATO</span><p>El sistema visual humano reconoce una imagen en cerca de <b>13 milisegundos</b>, mucho antes de leer una sola palabra. Por eso la imagen entra primero y el texto precisa después.</p></div>`;
+  shell('#2C46C0','#16225E','Unidad I · La imagen visual','Clasificador de imágenes','Las cuatro clases de imagen visual',body);
+  const svg=document.getElementById('clfSvg'),cap=document.getElementById('clfCap');
+  document.getElementById('clfTabs').addEventListener('click',e=>{
+    const b=e.target.closest('.tb');if(!b)return;
+    document.querySelectorAll('#clfTabs .tb').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    const t=TYPES[+b.dataset.i];svg.style.opacity=0;
+    setTimeout(()=>{svg.innerHTML=t.svg;svg.style.opacity=1;cap.innerHTML=`<b>${t.n}.</b> ${t.d}<br><span style="color:var(--slate-soft);font-size:12px">Ejemplo: ${t.e}</span>`;},200);
+  });
+}
+
+/* II · EL PESO DE LA PALABRA */
+function demoSignificado(){
+  const R=[
+    {k:"Denotativo",big:"Un círculo rojo",sm:"Lo que es, sin interpretación.",bg:"#ffffff",o:"#D7402F"},
+    {k:"Connotativo",big:"Pasión · Alto · Energía",sm:"Lo que evoca, según la cultura.",bg:"#fdeee9",o:"#D7402F"},
+    {k:"Abstracto",big:"Tensión en el centro",sm:"Una forma que sugiere una sensación.",bg:"#f0ece2",o:"#1B2745"}
+  ];
+  const body=`<div class="demo">
+    <div class="tabs" id="sg2Tabs">${R.map((r,i)=>`<button class="tb ${i===0?'on':''}" data-i="${i}">${r.k}</button>`).join('')}</div>
+    <div class="demo-stage"><div class="sig2"><div class="field" id="sg2Field"><div class="o" id="sg2O"></div></div><div class="read"><div class="big disp" id="sg2Big">${R[0].big}</div><div class="sm" id="sg2Sm">${R[0].sm}</div></div></div></div>
+    <div class="demo-cap">La imagen no cambia, pero <b>la palabra cambia su lectura</b>. Así funciona el significado en el diseño.</div>
+  </div>
+  <div class="dato"><span class="b disp">DATO</span><p>La campaña <b>“Comparte una Coca-Cola”</b> cambió el logo por nombres propios y logró subir las ventas por primera vez en <b>11 años</b>: la palabra volvió personal a la imagen.</p></div>`;
+  shell('#2C46C0','#16225E','Unidad II · Ilustración + palabra','El peso de la palabra','La misma imagen, tres lecturas',body);
+  const field=document.getElementById('sg2Field'),o=document.getElementById('sg2O'),big=document.getElementById('sg2Big'),sm=document.getElementById('sg2Sm');
+  document.getElementById('sg2Tabs').addEventListener('click',e=>{
+    const b=e.target.closest('.tb');if(!b)return;
+    document.querySelectorAll('#sg2Tabs .tb').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    const r=R[+b.dataset.i];field.style.background=r.bg;o.style.background=r.o;
+    o.style.borderRadius=(+b.dataset.i===2)?'8px':'50%';o.style.transform=(+b.dataset.i===2)?'rotate(45deg)':'none';
+    big.textContent=r.big;sm.textContent=r.sm;
+  });
+}
+
+/* III · EL ESPACIO QUE RESPIRA */
+function demoEspacio(){
+  // overlays dibujados sobre un marco constante 360x222 (=proporción áurea), por eso siempre alinean
+  const TH=`<svg class="ws-ovl" id="wsTh" viewBox="0 0 360 222" preserveAspectRatio="none">
+    <g stroke="#1F9B4E" stroke-width="1" opacity=".7"><line x1="120" y1="0" x2="120" y2="222"/><line x1="240" y1="0" x2="240" y2="222"/><line x1="0" y1="74" x2="360" y2="74"/><line x1="0" y1="148" x2="360" y2="148"/></g>
+    <circle cx="240" cy="74" r="5" fill="#C99A4F"/><circle cx="120" cy="148" r="3.5" fill="#1F9B4E"/></svg>`;
+  const GO=`<svg class="ws-ovl" id="wsGo" viewBox="0 0 360 222" preserveAspectRatio="none">
+    <rect x="0" y="0" width="360" height="222" fill="none" stroke="#C99A4F" stroke-width="1.4"/>
+    <line x1="222" y1="0" x2="222" y2="222" stroke="#C99A4F" stroke-width="1.2" opacity=".8"/>
+    <line x1="222" y1="84" x2="360" y2="84" stroke="#C99A4F" stroke-width="1.2" opacity=".8"/>
+    <line x1="222" y1="84" x2="280" y2="84" stroke="#C99A4F" stroke-width="1.2" opacity=".55"/>
+    <path d="M222 0 A222 222 0 0 0 0 222" fill="none" stroke="#C99A4F" stroke-width="1.6"/>
+    <path d="M360 84 A138 138 0 0 0 222 222" fill="none" stroke="#C99A4F" stroke-width="1.6" opacity=".85"/>
+    <circle cx="222" cy="84" r="4" fill="#C99A4F"/></svg>`;
+  const body=`<div class="demo">
+    <div class="demo-stage">
+      <div class="ws-frame">
+        <div class="ws" id="ws"><div class="ttl"></div><div class="bar s"></div><div class="img"></div><div class="bar m"></div><div class="bar l"></div></div>
+        ${TH}${GO}
+      </div>
+    </div>
+    <div class="ws-ctl">
+      <div class="lbl"><span>Saturado</span><b id="wsState">Equilibrado</b><span>Con aire</span></div>
+      <input type="range" id="wsRange" min="0" max="100" value="48" aria-label="Cantidad de espacio en blanco">
+      <div class="ovl-btns"><button class="tb" id="wsThB">Regla de tercios</button><button class="tb" id="wsGoB">Proporción áurea</button></div>
+    </div>
+  </div>
+  <div class="dato"><span class="b disp">DATO</span><p>El espacio en blanco no es área desperdiciada: es <b>respiración</b>. Y la <b>proporción áurea (1:1.618)</b> marca el punto donde el ojo percibe el equilibrio como natural.</p></div>`;
+  shell('#2C46C0','#16225E','Unidad III · Proporción visual','El espacio que respira','Mueve el control: del saturado al aire',body);
+  const ws=document.getElementById('ws'),range=document.getElementById('wsRange'),state=document.getElementById('wsState');
+  const th=document.getElementById('wsTh'),go=document.getElementById('wsGo'),thB=document.getElementById('wsThB'),goB=document.getElementById('wsGoB');
+  function upd(){const v=+range.value;
+    ws.style.setProperty('--pad',(6+v*0.30)+'px');
+    ws.style.setProperty('--gap',(3+v*0.20)+'px');
+    ws.style.setProperty('--th',(8-v*0.035)+'px');
+    state.textContent=v<33?'Saturado':v>66?'Con aire':'Equilibrado';}
+  range.oninput=upd;upd();
+  thB.onclick=function(){const on=th.classList.toggle('on');this.classList.toggle('on',on);go.classList.remove('on');goB.classList.remove('on');};
+  goB.onclick=function(){const on=go.classList.toggle('on');this.classList.toggle('on',on);th.classList.remove('on');thB.classList.remove('on');};
+}
+
+/* IV · DEL BOCETO AL DISEÑO */
+function demoBoceto(){
+  const S=[
+    {n:"Miniatura",t:"Bloques rápidos para explorar la distribución sin perder tiempo en detalles."},
+    {n:"Preparatorio",t:"Se definen posiciones, tamaños y estructura. Aparece el esqueleto del diseño."},
+    {n:"Exhaustivo",t:"Casi idéntico al final: tipografía, color e imagen en su lugar, listo para producción."}
+  ];
+  const SK=[
+    `<div class="sk s1"><div class="b bttl"></div><div class="b bimg"></div><div class="row"><div class="b"></div><div class="b"></div></div><div class="b scrib"></div></div>`,
+    `<div class="sk s2"><div class="b bttl"></div><div class="b bimg"></div><div class="b bl w1"></div><div class="b bl w2"></div><div class="b bl w3"></div><span class="tick"></span><span class="gl"></span></div>`,
+    `<div class="sk s3"><div class="bttl"></div><div class="sub"></div><div class="bimg"></div><div class="bl w1"></div><div class="bl w2"></div><div class="bl w3"></div><div class="cta"></div></div>`
+  ];
+  const body=`<div class="demo">
+    <div class="stepper" id="bkStep">
+      <div class="st on" data-i="0"><div class="d disp">1</div><div class="t">Miniatura</div></div><div class="line"></div>
+      <div class="st" data-i="1"><div class="d disp">2</div><div class="t">Preparatorio</div></div><div class="line"></div>
+      <div class="st" data-i="2"><div class="d disp">3</div><div class="t">Exhaustivo</div></div>
+    </div>
+    <div class="demo-stage" id="bkStage">${SK[0]}</div>
+    <div class="demo-cap"><b id="bkN">Miniatura.</b> <span id="bkT">${S[0].t}</span></div>
+  </div>
+  <div class="dato"><span class="b disp">DATO</span><p>Bocetar es pensar con las manos. El <b>boceto exhaustivo</b> es la representación más cercana al diseño final y permite corregir antes de producir, cuando aún es barato cambiar.</p></div>`;
+  shell('#2C46C0','#16225E','Unidad IV · Comunicación impresa','Del boceto al diseño','Tres niveles de fidelidad, de lo rápido a lo casi final',body);
+  const stage2=document.getElementById('bkStage'),n=document.getElementById('bkN'),t=document.getElementById('bkT');
+  document.getElementById('bkStep').addEventListener('click',e=>{
+    const s=e.target.closest('.st');if(!s)return;const i=+s.dataset.i;
+    document.querySelectorAll('#bkStep .st').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+    stage2.innerHTML=SK[i];n.textContent=S[i].n+'.';t.textContent=S[i].t;
+  });
+}
+
+/* V · LOS SIETE PRINCIPIOS */
+function demoPrincipios(start){
+  const P=[
+    {n:"Estilo",d:"El conjunto de rasgos visuales que dan identidad y tono a una pieza.",demo:"estilo"},
+    {n:"Contraste",d:"La diferencia perceptible que crea interés y dirige la atención.",demo:"contraste"},
+    {n:"Equilibrio",d:"La distribución del peso visual dentro de la composición.",demo:"equilibrio"},
+    {n:"Proporción",d:"La relación de tamaño entre los elementos del conjunto.",demo:"proporcion"},
+    {n:"Ritmo",d:"La repetición organizada que crea flujo y movimiento.",demo:"ritmo"},
+    {n:"Armonía",d:"La coherencia entre colores, tipografías y formas.",demo:"armonia"},
+    {n:"Unidad",d:"Cuando todos los elementos funcionan como un solo conjunto.",demo:"unidad"}
+  ];
+  const body=`<div class="pv">
+    <div class="pv-rail" id="pvRail">${P.map((p,i)=>`<button data-i="${i}" class="${i===start?'on':''} disp"><span class="n mono">0${i+1}</span> ${p.n}</button>`).join('')}</div>
+    <div class="pv-panel"><div class="pv-def" id="pvDef"></div><div class="pv-demo" id="pvDemo"></div></div>
+  </div>
+  <div class="dato"><span class="b disp">DATO</span><p>Los siete principios <b>no actúan por separado</b>: el estilo fija el tono, el contraste y la proporción ordenan la jerarquía, el ritmo y el equilibrio guían el recorrido, y la armonía y la unidad cierran el conjunto.</p></div>`;
+  shell('#2C46C0','#16225E','Unidad V · Principios del diseño','Los siete principios, en vivo','Selecciona un principio para verlo demostrado',body);
+  const def=document.getElementById('pvDef'),demo=document.getElementById('pvDemo');
+  function dEstilo(s){const exp=s==='exp';
+    const piece = exp
+      ? `<div style="width:250px;background:#1B2745;border-radius:10px;padding:20px 18px;position:relative;overflow:hidden;box-shadow:var(--sh-sm)">
+           <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;border-radius:50%;background:#D7402F"></div>
+           <div style="position:absolute;bottom:14px;right:16px;width:34px;height:34px;background:#1F9B4E"></div>
+           <div class="disp" style="font-weight:700;font-size:34px;color:#C99A4F;letter-spacing:1px;line-height:.9;position:relative">AURORA</div>
+           <div style="font-family:'Inter';font-style:italic;color:#fff;font-size:13px;margin-top:8px">café de altura</div>
+           <div style="height:6px;width:70px;background:#C99A4F;border-radius:3px;margin-top:16px"></div>
+         </div>`
+      : `<div style="width:250px;background:#fff;border:1px solid #e7e2d6;border-radius:10px;padding:24px 20px">
+           <div class="disp" style="font-weight:400;font-size:24px;color:#1B2745;letter-spacing:4px">AURORA</div>
+           <div style="height:1px;width:40px;background:#C99A4F;margin:12px 0"></div>
+           <div style="font-size:12px;color:#79839b;letter-spacing:.04em">café de altura</div>
+           <div style="height:4px;width:84%;background:#eceae3;border-radius:2px;margin-top:22px"></div>
+           <div style="height:4px;width:60%;background:#eceae3;border-radius:2px;margin-top:6px"></div>
+         </div>`;
+    return `<div style="display:flex;flex-direction:column;gap:14px;align-items:center;width:100%">
+      ${piece}
+      <div style="font-family:'Inter';font-style:italic;font-size:12px;color:var(--slate-soft)">Mismo contenido, ${exp?'estilo expresivo':'estilo minimalista'}.</div>
+      <div class="pv-sub"><button class="${!exp?'on':''}" data-sub="min">Minimalista</button><button class="${exp?'on':''}" data-sub="exp">Expresivo</button></div>
+    </div>`;}
+  function dContraste(s){s=s||'tam';const map={
+    tam:`<div style="display:flex;align-items:baseline;gap:18px"><span class="disp" style="font-size:74px;font-weight:700;color:#1B2745">A</span><span class="disp" style="font-size:24px;color:#79839b">a</span></div>`,
+    forma:`<div style="display:flex;gap:24px;align-items:center"><div style="width:64px;height:64px;border-radius:50%;background:#6c93b3"></div><div style="width:64px;height:64px;background:#1B2745"></div></div>`,
+    tono:`<div style="display:flex;gap:0;border-radius:8px;overflow:hidden"><div style="width:60px;height:64px;background:#e9edf2"></div><div style="width:60px;height:64px;background:#7d8aa3"></div><div style="width:60px;height:64px;background:#1B2745"></div></div>`,
+    dir:`<svg width="180" height="120"><line x1="10" y1="35" x2="170" y2="35" stroke="#9aa6bb" stroke-width="3"/><line x1="10" y1="60" x2="170" y2="60" stroke="#9aa6bb" stroke-width="3"/><line x1="10" y1="85" x2="170" y2="85" stroke="#9aa6bb" stroke-width="3"/><line x1="25" y1="105" x2="160" y2="20" stroke="#C99A4F" stroke-width="4"/></svg>`};
+    return map[s]+`<div class="pv-sub" style="margin-top:16px;position:absolute;bottom:12px"><button class="${s==='tam'?'on':''}" data-sub="tam">Tamaño</button><button class="${s==='forma'?'on':''}" data-sub="forma">Forma</button><button class="${s==='tono'?'on':''}" data-sub="tono">Tono</button><button class="${s==='dir'?'on':''}" data-sub="dir">Dirección</button></div>`;}
+  function dEquilibrio(s){s=s||'sim';const map={
+    sim:`<svg width="200" height="120"><line x1="100" y1="10" x2="100" y2="110" stroke="#cdd2db" stroke-dasharray="4 4"/><circle cx="60" cy="55" r="22" fill="#1B2745"/><circle cx="140" cy="55" r="22" fill="#1B2745"/><rect x="48" y="86" width="24" height="20" fill="#C99A4F"/><rect x="128" y="86" width="24" height="20" fill="#C99A4F"/></svg>`,
+    asim:`<svg width="200" height="120"><circle cx="64" cy="60" r="34" fill="#1B2745"/><rect x="124" y="30" width="20" height="20" fill="#D7402F"/><rect x="124" y="56" width="20" height="20" fill="#C99A4F"/><rect x="124" y="82" width="20" height="20" fill="#6c93b3"/></svg>`,
+    rad:`<svg width="160" height="120"><g fill="#1B2745"><circle cx="80" cy="60" r="9" fill="#C99A4F"/><circle cx="80" cy="22" r="8"/><circle cx="113" cy="41" r="8"/><circle cx="113" cy="79" r="8"/><circle cx="80" cy="98" r="8"/><circle cx="47" cy="79" r="8"/><circle cx="47" cy="41" r="8"/></g></svg>`};
+    return map[s]+`<div class="pv-sub" style="margin-top:16px;position:absolute;bottom:12px"><button class="${s==='sim'?'on':''}" data-sub="sim">Simétrico</button><button class="${s==='asim'?'on':''}" data-sub="asim">Asimétrico</button><button class="${s==='rad'?'on':''}" data-sub="rad">Radial</button></div>`;}
+  function dProporcion(){return `<div style="display:flex;gap:22px;align-items:center"><div style="text-align:center"><div style="width:54px;height:54px;border-radius:50%;background:#1B2745;display:grid;place-items:center;margin:0 auto"><div style="width:22px;height:22px;border-radius:50%;background:#C99A4F"></div></div><div style="height:5px;width:54px;background:#1B2745;border-radius:3px;margin-top:8px"></div><div class="mono" style="font-size:9px;color:#1F9B4E;margin-top:6px">ARMÓNICA</div></div><div style="text-align:center"><div style="width:84px;height:84px;border-radius:50%;background:#1B2745;display:grid;place-items:center;margin:0 auto"><div style="width:42px;height:42px;border-radius:50%;background:#C99A4F"></div></div><div style="height:4px;width:40px;background:#9aa6bb;border-radius:3px;margin:8px auto 0"></div><div class="mono" style="font-size:9px;color:#D7402F;margin-top:6px">FORZADA</div></div></div>`;}
+  function dRitmo(){return `<svg width="280" height="90"><g fill="#1B2745"><circle class="rit" cx="30" cy="60" r="9"/><circle class="rit" cx="80" cy="60" r="13"/><circle class="rit" cx="135" cy="60" r="17"/><circle class="rit" cx="198" cy="60" r="21"/><circle cx="252" cy="60" r="25" fill="#C99A4F"/></g><style>.rit{animation:rb 1.6s var(--ease) infinite}@keyframes rb{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}svg circle:nth-child(2){animation-delay:.1s}svg circle:nth-child(3){animation-delay:.2s}svg circle:nth-child(4){animation-delay:.3s}
+</style></svg>`;}
+  function dArmonia(){return `<div style="display:flex;gap:0;border-radius:8px;overflow:hidden;box-shadow:var(--sh-sm)">${['#15203a','#284066','#3f6391','#6c93b3','#9fbdd6','#C99A4F'].map(c=>`<div style="width:48px;height:64px;background:${c}"></div>`).join('')}</div>`;}
+  function dUnidad(){return `<svg width="240" height="140"><g stroke="#e3ddcf" stroke-width="1"><line x1="80" y1="10" x2="80" y2="130"/><line x1="160" y1="10" x2="160" y2="130"/><line x1="10" y1="55" x2="230" y2="55"/></g><rect x="14" y="14" width="58" height="58" fill="#1B2745"/><circle cx="43" cy="43" r="13" fill="#C99A4F"/><rect x="84" y="14" width="142" height="7" fill="#1B2745"/><rect x="84" y="28" width="120" height="4" fill="#cdd2db"/><rect x="84" y="36" width="130" height="4" fill="#cdd2db"/><rect x="14" y="82" width="58" height="4" fill="#cdd2db"/><rect x="14" y="90" width="48" height="4" fill="#cdd2db"/><rect x="84" y="62" width="100" height="40" fill="#6c93b3"/><rect x="84" y="110" width="40" height="8" fill="#1F9B4E"/></svg>`;}
+  const R={estilo:dEstilo,contraste:dContraste,equilibrio:dEquilibrio,proporcion:dProporcion,ritmo:dRitmo,armonia:dArmonia,unidad:dUnidad};
+  function render(i){
+    document.querySelectorAll('#pvRail button').forEach(x=>x.classList.toggle('on',+x.dataset.i===i));
+    def.innerHTML=`<b>${P[i].n}.</b> ${P[i].d}`;
+    const fn=R[P[i].demo];demo.innerHTML=(P[i].demo==='estilo')?fn('min'):fn();demo.style.position='relative';
+    demo.querySelectorAll('.pv-sub button').forEach(b=>b.onclick=()=>{const cur=document.querySelector('#pvRail button.on');const idx=+cur.dataset.i;demo.innerHTML=R[P[idx].demo](b.dataset.sub);wireSub(idx);});
+  }
+  function wireSub(i){demo.querySelectorAll('.pv-sub button').forEach(b=>b.onclick=()=>{demo.innerHTML=R[P[i].demo](b.dataset.sub);wireSub(i);});}
+  document.getElementById('pvRail').addEventListener('click',e=>{const b=e.target.closest('button');if(b)render(+b.dataset.i);});
+  render(start||0);
+}
+</script>
+</body>
+</html>
